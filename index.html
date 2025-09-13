@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<title>My blog</title>
+<style>
+body { font-family: system-ui, Arial, sans-serif; margin: 0; }
+.layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+aside { padding: 20px; border-right: 1px solid #eee; }
+main { padding: 20px; }
+.titles { list-style: none; margin: 0; padding: 0; }
+.titles li { margin: 6px 0; }
+.titles a { text-decoration: none; color: #333; }
+.titles a.active { font-weight: 700; }
+.post { display: none; }
+.post.active { display: block; }
+.post-title { margin-top: 0; }
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+<h2>All posts</h2>
+<!-- JS wygeneruje tutaj linki -->
+<ul class="titles"></ul>
+</aside>
+
+<main class="posts">
+<!-- Przykładowe artykuły – id MUSI być unikalne -->
+<article class="post active" id="article-1">
+<h3 class="post-title">Pierwszy wpis</h3>
+<p>To jest treść pierwszego wpisu.</p>
+</article>
+
+<article class="post" id="article-2">
+<h3 class="post-title">Drugi wpis</h3>
+<p>To jest treść drugiego wpisu.</p>
+</article>
+
+<article class="post" id="article-3">
+<h3 class="post-title">Trzeci wpis</h3>
+<p>To jest treść trzeciego wpisu.</p>
+</article>
+</main>
+</div>
+
+<script src="js/script.js"></script>
+</body>
+</html>
