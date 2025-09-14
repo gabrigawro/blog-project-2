@@ -1,89 +1,31 @@
-* { box-sizing: border-box; }
 body {
-  margin: 0;
-  font-family: system-ui, Arial, sans-serif;
-  line-height: 1.55;
-  color: #222;
-  background: #fff;
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  line-height: 1.6;
 }
-.layout {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  min-height: 100vh;
+
+header {
+  margin-bottom: 20px;
 }
-.sidebar {
-  background: #f6f7fb;
-  border-right: 1px solid #e5e7eb;
-  padding: 16px 14px;
-}
-.sidebar h2 {
-  margin: 18px 0 8px;
-  font-size: 16px;
-  letter-spacing: .3px;
-  color: #444;
-}
-.list {
+
+nav ul, #tag-cloud {
   list-style: none;
   padding: 0;
-  margin: 0 0 16px;
-  display: grid;
-  gap: 6px;
 }
-.list a {
-  text-decoration: none;
-  border-radius: 8px;
-  padding: 6px 8px;
+
+nav ul li, #tag-cloud li {
+  margin: 5px 0;
+}
+
+#tag-cloud li {
   display: inline-block;
-  border: 1px solid transparent;
-  color: inherit;
-}
-.titles a { display: block; }
-.titles a:hover,
-.tags a:hover,
-.authors a:hover {
-  background: #eef2ff;
-  border-color: #c7d2fe;
-}
-a.active {
-  background: #e0e7ff;
-  border-color: #818cf8;
-  font-weight: 700;
-}
-.content {
-  padding: 24px 28px;
-}
-.post { display: none; }
-.post.active { display: block; animation: fade .18s ease-out; }
-.post-title { margin: 0 0 8px; }
-.post-meta {
-  font-size: 14px;
-  color: #555;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-.post-tags .list { display: inline-flex; gap: 6px; }
-.post-tags .list li { display: inline; }
-.post-tags .list a,
-.post-author a {
-  text-decoration: none;
-  padding: 2px 6px;
-  border-radius: 6px;
-  border: 1px solid #e5e7eb;
+  margin: 5px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  background: #eee;
+  cursor: pointer;
 }
 
-/* Rozmiary w chmurze tagów/autorów */
 .tag-size-1 { font-size: 12px; }
-.tag-size-2 { font-size: 13px; }
-.tag-size-3 { font-size: 14px; }
-.tag-size-4 { font-size: 15px; }
-.tag-size-5 { font-size: 16px; }
-
-.author-size-1 { font-size: 12px; }
-.author-size-2 { font-size: 13px; }
-.author-size-3 { font-size: 14px; }
-.author-size-4 { font-size: 15px; }
-.author-size-5 { font-size: 16px; }
-
-@keyframes fade { from { opacity: .2; transform: translateY(2px);} to { opacity: 1; transform: translateY(0);} }
+.tag-size-2 { font-size: 16px; }
+.tag-size-3 { font-size: 20px; }

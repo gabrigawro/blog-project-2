@@ -1,102 +1,49 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Blog Project 2 — Handlebars</title>
-  <link rel="stylesheet" href="css/style.css"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog Project 2</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
-  <div class="layout">
-    <aside class="sidebar">
-      <h2>Artykuły</h2>
-      <ul class="list titles"><!-- JS wstawi linki tytułów --></ul>
-
-      <h2>Tagi</h2>
-      <ul class="list tags"><!-- JS wstawi chmurę tagów --></ul>
-
-      <h2>Autorzy</h2>
-      <ul class="list authors"><!-- JS wstawi chmurę autorów --></ul>
+  <header>
+    <h1>Mój Blog</h1>
+    <nav>
+      <ul id="article-list"></ul>
+    </nav>
+    <aside>
+      <h3>Chmura tagów</h3>
+      <ul id="tag-cloud"></ul>
     </aside>
+  </header>
 
-    <main class="content">
-      <section class="posts">
-        <!-- PRZYKŁADOWE ARTYKUŁY (możesz później zmieniać treści) -->
-        <article id="article-1" class="post active" data-tags="JS, DOM, selektory" data-author="Jan Kowalski">
-          <h3 class="post-title">Generowanie listy tytułów</h3>
+  <main>
+    <article>
+      <h2>Artykuł 1</h2>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+    </article>
+    <article>
+      <h2>Artykuł 2</h2>
+      <p>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+    </article>
+  </main>
 
-          <div class="post-meta">
-            <span class="post-author"></span>
-            <span class="post-tags"><ul class="list"></ul></span>
-          </div>
+  <!-- ====== Szablony Handlebars ====== -->
 
-          <div class="post-content">
-            <p>Treść pierwszego artykułu. Po lewej masz listę tytułów i filtry (tagi, autorzy).</p>
-          </div>
-        </article>
-
-        <article id="article-2" class="post" data-tags="JS, wydarzenia, click" data-author="Anna Nowak">
-          <h3 class="post-title">Obsługa zdarzeń click</h3>
-
-          <div class="post-meta">
-            <span class="post-author"></span>
-            <span class="post-tags"><ul class="list"></ul></span>
-          </div>
-
-          <div class="post-content">
-            <p>Kliknięcie w tag lub autora filtruje widoczne artykuły i listę tytułów.</p>
-          </div>
-        </article>
-
-        <article id="article-3" class="post" data-tags="debug, console.log" data-author="Jan Kowalski">
-          <h3 class="post-title">Debugowanie i console.log</h3>
-
-          <div class="post-meta">
-            <span class="post-author"></span>
-            <span class="post-tags"><ul class="list"></ul></span>
-          </div>
-
-          <div class="post-content">
-            <p>Uczciwe logi w konsoli oszczędzają godziny życia. Naprawdę.</p>
-          </div>
-        </article>
-      </section>
-    </main>
-  </div>
-
-  <!-- SZABLONY HANDLEBARS -->
-  <!-- 1) Link do tytułu artykułu w lewej kolumnie -->
+  <!-- link do artykułu -->
   <script id="template-article-link" type="text/x-handlebars-template">
     <li><a href="#{{id}}"><span>{{title}}</span></a></li>
   </script>
 
-  <!-- 2) Pojedynczy link tagu używany wewnątrz artykułu -->
-  <script id="template-tag-link" type="text/x-handlebars-template">
-    <li><a href="#tag-{{id}}">{{name}}</a></li>
-  </script>
-
-  <!-- 3) Chmura tagów (lista w sidebarze) -->
+  <!-- chmura tagów -->
   <script id="template-tag-cloud-link" type="text/x-handlebars-template">
     {{#each tags}}
-      <li><a class="{{className}}" href="#tag-{{id}}">{{label}} ({{count}})</a></li>
+      <li class="{{className}}">{{tag}} ({{count}})</li>
     {{/each}}
   </script>
 
-  <!-- 4) Link autora w artykule -->
-  <script id="template-author-link" type="text/x-handlebars-template">
-    Autor: <a href="#author-{{id}}">{{name}}</a>
-  </script>
-
-  <!-- 5) Chmura autorów (lista w sidebarze) -->
-  <script id="template-author-cloud-link" type="text/x-handlebars-template">
-    {{#each authors}}
-      <li><a class="{{className}}" href="#author-{{id}}">{{label}} ({{count}})</a></li>
-    {{/each}}
-  </script>
-
-  <!-- BIBLIOTEKA HANDLEBARS nad Twoim skryptem -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.1.0/handlebars.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js"></script>
   <script src="js/script.js"></script>
 </body>
 </html>
