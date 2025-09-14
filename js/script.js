@@ -1,138 +1,134 @@
-/* ========= Stałe selektory ========= */
-const optArticleSelector = '.post';
-const optTitleSelector = '.post-title';
-const optTitleListSelector = '.titles';
+/* ========= Selektory i parametry ========= */
+const opt = {
+  articleSelector: '.post',
+  titleSelector: '.post-title',
+  titleList: '.titles',
+  articleTags: '.post-tags .list',
+  tagsList: '.list.tags',
+  articleAuthor: '.post-author',
+  authorsList: '.list.authors',
+  tagCloud: { classPrefix: 'tag-size-', levels: 5 },
+  authorCloud: { classPrefix: 'author-size-', levels: 5 },
+};
 
-const optArticleTagsSelector = '.post-tags .list';
-const optTagsListSelector = '.list.tags';
-
-const optArticleAuthorSelector = '.post-author';
-const optAuthorsListSelector = '.list.authors';
+/* ========= Szablony Handlebars ========= */
+const templates = {
+  articleLink: Handlebars.compile(document.querySelector('#template-article-link').innerHTML),
+  tagLink: Handlebars.compile(document.querySelector('#template-tag-link').innerHTML),
+  tagCloud: Handlebars.compile(document.querySelector('#template-tag-cloud-link').innerHTML),
+  authorLink: Handlebars.compile(document.querySelector('#template-author-link').innerHTML),
+  authorCloud: Handlebars.compile(document.querySelector('#template-author-cloud-link').innerHTML),
+};
 
 /* ========= Helpery ========= */
-function normalizeToId(txt) {
-  return txt.trim().toLowerCase().replace(/\s+/g, '-');
+const toId = (txt) => txt.trim().toLowerCase().replace(/\s+/g, '-');
+
+function calcClass(count, {min, max}, {classPrefix, levels}) {
+  if (min === max) return classPrefix + Math.ceil(levels / 2);
+  const normalized = (count - min) / (max - min);
+  const level = 1 + Math.floor(normalized * (levels - 1));
+  return classPrefix + level;
 }
 
-/* ========= Generowanie listy tytułów (z filtrem) ========= */
-function generateTitleLinks(customSelector = '') {
-  const titleList = document.querySelector(`.${optTitleListSelector.split('.').pop()}`);
+/* ========= Lista tytułów (z filtrem) ========= */
+function generateTitleLinks(filterFn = null) {
+  const titleList = document.querySelector(opt.titleList);
   titleList.innerHTML = '';
 
-  const articles = document.querySelectorAll(optArticleSelector + customSelector);
+  const allArticles = Array.from(document.querySelectorAll(opt.articleSelector));
+  const articles = filterFn ? allArticles.filter(filterFn) : allArticles;
 
   let html = '';
-  for (let article of articles) {
-    const articleId = article.getAttribute('id');
-    const title = article.querySelector(optTitleSelector)?.innerHTML || 'Bez tytułu';
-    html += `<li><a href="#${articleId}"><span>${title}</span></a></li>`;
+  for (const article of articles) {
+    const id = article.getAttribute('id');
+    const title = article.querySelector(opt.titleSelector)?.innerHTML || 'Bez tytułu';
+    html += templates.articleLink({ id, title });
   }
-
   titleList.innerHTML = html;
 
-  const links = titleList.querySelectorAll('a');
-  for (let link of links) link.addEventListener('click', titleClickHandler);
-
-  // Jeżeli filtr zwrócił wyniki – pokaż pierwszy artykuł z listy
-  if (links.length) {
-    links[0].classList.add('active');
-    const firstHref = links[0].getAttribute('href');
-    document.querySelectorAll(optArticleSelector).forEach(a => a.classList.remove('active'));
-    const firstArticle = document.querySelector(firstHref);
+  // aktywuj pierwszy i pokaż jego artykuł
+  document.querySelectorAll('.post').forEach(p => p.classList.remove('active'));
+  const firstLink = titleList.querySelector('a');
+  if (firstLink) {
+    firstLink.classList.add('active');
+    const firstArticle = document.querySelector(firstLink.getAttribute('href'));
     if (firstArticle) firstArticle.classList.add('active');
-  } else {
-    // Brak wyników – ukryj wszystkie artykuły
-    document.querySelectorAll(optArticleSelector).forEach(a => a.classList.remove('active'));
   }
+
+  titleList.querySelectorAll('a').forEach(a => a.addEventListener('click', titleClickHandler));
 }
 
-/* ========= Kliknięcie w tytuł ========= */
-function titleClickHandler(event) {
-  event.preventDefault();
-  const clicked = this;
+function titleClickHandler(e) {
+  e.preventDefault();
+  const link = this;
 
-  document.querySelectorAll('.titles a.active').forEach(a => a.classList.remove('active'));
-  clicked.classList.add('active');
+  document.querySelectorAll(`${opt.titleList} a.active`).forEach(a => a.classList.remove('active'));
+  link.classList.add('active');
 
   document.querySelectorAll('.post.active').forEach(a => a.classList.remove('active'));
-  const href = clicked.getAttribute('href');
-  const target = document.querySelector(href);
+  const target = document.querySelector(link.getAttribute('href'));
   if (target) target.classList.add('active');
 }
 
 /* ========= TAGI ========= */
 function generateTags() {
-  const allTags = {}; // { 'js': 3, 'dom': 1, ... }
+  const allCounts = {}; // { 'js': 3, ... }
 
-  const articles = document.querySelectorAll(optArticleSelector);
-  for (let article of articles) {
-    const wrapper = article.querySelector(optArticleTagsSelector);
+  document.querySelectorAll(opt.articleSelector).forEach(article => {
+    const wrapper = article.querySelector(opt.articleTags);
     wrapper.innerHTML = '';
 
-    const tagsAttr = article.getAttribute('data-tags') || '';
-    const tags = tagsAttr.split(',').map(t => t.trim()).filter(Boolean);
+    const tags = (article.getAttribute('data-tags') || '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean);
 
-    const links = [];
-    for (let tag of tags) {
-      const id = normalizeToId(tag);
-      links.push(`<li><a href="#tag-${id}">${tag}</a></li>`);
-      allTags[id] = (allTags[id] || 0) + 1;
-    }
+    const links = tags.map(tag => {
+      const id = toId(tag);
+      allCounts[id] = (allCounts[id] || 0) + 1;
+      return templates.tagLink({ id, name: tag });
+    });
+
     wrapper.innerHTML = links.join('');
-  }
+  });
 
-  // sidebar
-  const list = document.querySelector(optTagsListSelector);
-  const items = Object.entries(allTags)
-    .sort((a,b) => a[0].localeCompare(b[0]))
-    .map(([id,count]) => `<li><a href="#tag-${id}">${id.replace(/-/g,' ')} (${count})</a></li>`);
-  list.innerHTML = items.join('');
+  // chmura tagów w sidebarze
+  const counts = Object.values(allCounts);
+  const range = { min: Math.min(...counts), max: Math.max(...counts) };
+  const data = {
+    tags: Object.entries(allCounts)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([id, count]) => ({
+        id,
+        count,
+        className: calcClass(count, range, opt.tagCloud),
+        label: id.replace(/-/g, ' ')
+      })),
+  };
+  document.querySelector(opt.tagsList).innerHTML = templates.tagCloud(data);
 }
 
-function tagClickHandler(event) {
-  event.preventDefault();
-  const href = this.getAttribute('href'); // "#tag-js"
-  const tagId = href.replace('#tag-','');
+function tagClickHandler(e) {
+  e.preventDefault();
+  const href = this.getAttribute('href');      // "#tag-something"
+  const tagId = href.replace('#tag-', '');
 
   // active dla tagów
   document.querySelectorAll('a[href^="#tag-"].active').forEach(a => a.classList.remove('active'));
   document.querySelectorAll(`a[href="${href}"]`).forEach(a => a.classList.add('active'));
 
-  // filtr artykułów po tagu (szukamy w data-tags po słowie)
-  // uproszczenie: dopasowujemy przez zawartość atrybutu (case-insensitive)
-  generateTitleLinks(
-    Array.from(document.querySelectorAll(optArticleSelector))
-      .filter(a => (a.getAttribute('data-tags') || '').toLowerCase().split(',')
-        .map(s => s.trim().replace(/\s+/g,'-'))
-        .includes(tagId))
-      .length ? '' : '' // generateTitleLinks i tak przeładuje listę; filtr zrobimy niżej
-  );
-
-  // zamiast kombinacji z selektorami CSS, wykonamy własny filtr:
-  const all = document.querySelectorAll(optArticleSelector);
-  let firstShown = null;
-  all.forEach(a => {
-    const has = (a.getAttribute('data-tags') || '').toLowerCase().split(',').map(s=>s.trim().replace(/\s+/g,'-')).includes(tagId);
-    a.classList.toggle('active', has);
-    if (has && !firstShown) firstShown = a;
+  // filtruj artykuły po tagu (na podstawie data-tags)
+  generateTitleLinks(article => {
+    const tags = (article.getAttribute('data-tags') || '')
+      .toLowerCase()
+      .split(',')
+      .map(s => s.trim().replace(/\s+/g, '-'));
+    return tags.includes(tagId);
   });
 
-  // odśwież listę tytułów tak, by zawierała tylko te z dopasowaniem
-  const visibleIds = Array.from(all).filter(a => a.classList.contains('active')).map(a => `#${a.id}`);
-  const titleList = document.querySelector(optTitleListSelector);
-  titleList.innerHTML = '';
-  visibleIds.forEach(id => {
-    const t = document.querySelector(`${id} ${optTitleSelector}`)?.innerHTML || 'Bez tytułu';
-    titleList.innerHTML += `<li><a href="${id}"><span>${t}</span></a></li>`;
-  });
-  titleList.querySelectorAll('a').forEach(a => a.addEventListener('click', titleClickHandler));
-
-  // zaznacz pierwszy
-  if (firstShown) {
-    document.querySelectorAll('.titles a').forEach(a => a.classList.remove('active'));
-    const firstLink = document.querySelector(`.titles a[href="#${firstShown.id}"]`);
-    if (firstLink) firstLink.classList.add('active');
-  }
+  // po odświeżeniu listy musimy znów podpiąć listenery tagów (są nowe elementy)
+  addClickListenersToTags();
+  addClickListenersToAuthors(); // i autorów, bo lista tytułów się zmieniła
 }
 
 function addClickListenersToTags() {
@@ -141,62 +137,46 @@ function addClickListenersToTags() {
 
 /* ========= AUTORZY ========= */
 function generateAuthors() {
-  const counts = {}; // {"jan-kowalski": 2, ...}
+  const allCounts = {}; // { 'jan-kowalski': 2, ... }
 
-  const articles = document.querySelectorAll(optArticleSelector);
-  for (let article of articles) {
-    const author = article.getAttribute('data-author');
-    if (!author) continue;
-    const id = normalizeToId(author);
+  document.querySelectorAll(opt.articleSelector).forEach(article => {
+    const name = article.getAttribute('data-author') || '';
+    const id = toId(name);
+    allCounts[id] = (allCounts[id] || 0) + 1;
 
-    // w artykule
-    const spot = article.querySelector(optArticleAuthorSelector);
-    spot.innerHTML = `Autor: <a href="#author-${id}">${author}</a>`;
+    const place = article.querySelector(opt.articleAuthor);
+    place.innerHTML = templates.authorLink({ id, name });
+  });
 
-    counts[id] = (counts[id] || 0) + 1;
-  }
-
-  // sidebar
-  const list = document.querySelector(optAuthorsListSelector);
-  list.innerHTML = Object.entries(counts)
-    .sort((a,b) => a[0].localeCompare(b[0]))
-    .map(([id,count]) => `<li><a href="#author-${id}">${id.replace(/-/g,' ')} (${count})</a></li>`)
-    .join('');
+  // chmura autorów
+  const counts = Object.values(allCounts);
+  const range = { min: Math.min(...counts), max: Math.max(...counts) };
+  const data = {
+    authors: Object.entries(allCounts)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([id, count]) => ({
+        id,
+        count,
+        className: calcClass(count, range, opt.authorCloud),
+        label: id.replace(/-/g, ' ')
+      })),
+  };
+  document.querySelector(opt.authorsList).innerHTML = templates.authorCloud(data);
 }
 
-function authorClickHandler(event) {
-  event.preventDefault();
-  const href = this.getAttribute('href'); // "#author-jan-kowalski"
-  const authorId = href.replace('#author-',''); // "jan-kowalski"
+function authorClickHandler(e) {
+  e.preventDefault();
+  const href = this.getAttribute('href');     // "#author-jan-kowalski"
+  const authorId = href.replace('#author-', '');
 
-  // active dla autorów (w artykule i w sidebarze)
+  // active dla autorów
   document.querySelectorAll('a[href^="#author-"].active').forEach(a => a.classList.remove('active'));
   document.querySelectorAll(`a[href="${href}"]`).forEach(a => a.classList.add('active'));
 
-  // pokaż tylko artykuły tego autora
-  const all = document.querySelectorAll(optArticleSelector);
-  let firstShown = null;
-  all.forEach(a => {
-    const id = normalizeToId(a.getAttribute('data-author') || '');
-    const match = id === authorId;
-    a.classList.toggle('active', match);
-    if (match && !firstShown) firstShown = a;
-  });
+  generateTitleLinks(article => toId(article.getAttribute('data-author') || '') === authorId);
 
-  // odśwież listę tytułów do widocznych
-  const titleList = document.querySelector(optTitleListSelector);
-  titleList.innerHTML = '';
-  document.querySelectorAll('.post.active').forEach(article => {
-    const t = article.querySelector(optTitleSelector)?.innerHTML || 'Bez tytułu';
-    titleList.innerHTML += `<li><a href="#${article.id}"><span>${t}</span></a></li>`;
-  });
-  titleList.querySelectorAll('a').forEach(a => a.addEventListener('click', titleClickHandler));
-
-  // zaznacz pierwszy
-  if (firstShown) {
-    const firstLink = document.querySelector(`.titles a[href="#${firstShown.id}"]`);
-    if (firstLink) firstLink.classList.add('active');
-  }
+  addClickListenersToTags();
+  addClickListenersToAuthors();
 }
 
 function addClickListenersToAuthors() {
@@ -204,8 +184,8 @@ function addClickListenersToAuthors() {
 }
 
 /* ========= Start ========= */
-generateTitleLinks();        // lista tytułów
-generateTags();              // lista tagów + tagi w artykułach
-addClickListenersToTags();   // kliknięcia tagów
-generateAuthors();           // autor w artykule + lista autorów
-addClickListenersToAuthors();// kliknięcia autorów
+generateTitleLinks();      // lista tytułów
+generateTags();            // tagi w artykułach + chmura tagów
+generateAuthors();         // autor w artykule + chmura autorów
+addClickListenersToTags();
+addClickListenersToAuthors();

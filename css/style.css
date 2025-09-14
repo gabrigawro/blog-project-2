@@ -2,8 +2,9 @@
 body {
   margin: 0;
   font-family: system-ui, Arial, sans-serif;
-  line-height: 1.5;
+  line-height: 1.55;
   color: #222;
+  background: #fff;
 }
 .layout {
   display: grid;
@@ -34,6 +35,7 @@ body {
   padding: 6px 8px;
   display: inline-block;
   border: 1px solid transparent;
+  color: inherit;
 }
 .titles a { display: block; }
 .titles a:hover,
@@ -50,13 +52,8 @@ a.active {
 .content {
   padding: 24px 28px;
 }
-.post {
-  display: none;
-}
-.post.active {
-  display: block;
-  animation: fade .18s ease-out;
-}
+.post { display: none; }
+.post.active { display: block; animation: fade .18s ease-out; }
 .post-title { margin: 0 0 8px; }
 .post-meta {
   font-size: 14px;
@@ -66,10 +63,7 @@ a.active {
   gap: 12px;
   margin-bottom: 16px;
 }
-.post-tags .list {
-  display: inline-flex;
-  gap: 6px;
-}
+.post-tags .list { display: inline-flex; gap: 6px; }
 .post-tags .list li { display: inline; }
 .post-tags .list a,
 .post-author a {
@@ -78,7 +72,18 @@ a.active {
   border-radius: 6px;
   border: 1px solid #e5e7eb;
 }
-@keyframes fade {
-  from { opacity: .2; transform: translateY(2px); }
-  to   { opacity: 1;   transform: translateY(0); }
-}
+
+/* Rozmiary w chmurze tagów/autorów */
+.tag-size-1 { font-size: 12px; }
+.tag-size-2 { font-size: 13px; }
+.tag-size-3 { font-size: 14px; }
+.tag-size-4 { font-size: 15px; }
+.tag-size-5 { font-size: 16px; }
+
+.author-size-1 { font-size: 12px; }
+.author-size-2 { font-size: 13px; }
+.author-size-3 { font-size: 14px; }
+.author-size-4 { font-size: 15px; }
+.author-size-5 { font-size: 16px; }
+
+@keyframes fade { from { opacity: .2; transform: translateY(2px);} to { opacity: 1; transform: translateY(0);} }
